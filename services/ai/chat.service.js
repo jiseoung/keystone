@@ -31,9 +31,18 @@ const requestChatCompletion = async (messages, options = {}) => {
         throw new Error('OpenAI 응답에서 메시지를 찾을 수 없습니다.');
     }
 
+    const usage = completion.usage || {
+        prompt_tokens: 0,
+        completion_tokens: 0,
+        total_tokens: 0,
+    };
+
     return {
-        role: choice.role,
-        content: choice.content,
+        message: {
+            role: choice.role,
+            content: choice.content,
+        },
+        usage,
     };
 };
 
