@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입</title>
+    <link rel="stylesheet" href="/auth/register.css">
+</head>
+<body>
+    <section class="card">
+        <h1>회원가입</h1>
+        <form method="POST">
+            <label for="id">
+                아이디
+                <input type="text" id="id" name="id" required />
+            </label>
+            <label for="pw">
+                비밀번호
+                <input type="password" id="pw" name="pw" required />
+            </label>
+            <label for="email">
+                이메일
+                <input type="email" id="email" name="email" required />
+            </label>
+            <label for="age">
+                나이
+                <input type="number" id="age" name="age" min="1" required />
+            </label>
+            <button type="submit">가입하기</button>
+        </form>
+    </section>
+</body>
+</html>

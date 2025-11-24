@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/ai/chat.css">
+</head>
+<body>
+    <section class="chat-container">
+        <header><%= title %></header>
+        <ul id="messages"></ul>
+        <form id="chat-form">
+            <textarea id="message-input" placeholder="AI에게 질문을 입력하세요." required></textarea>
+            <div class="status" id="status"></div>
+            <button type="submit">전송</button>
+        </form>
+    </section>
+    <script>
+        (() => {
+            const form = document.getElementById('chat-form');
+            const textarea = document.getElementById('message-input');
+            const messagesEl = document.getElementById('messages');
+            const statusEl = document.getElementById('status');
+            const submitButton = form.querySelector('button[type="submit"]');
+
+            const history = [];
+
+            const addMessage = (role, content) => {
+                const li = document.createElement('li');
+                li.className = `message ${role}`;
+                li.textContent = content.trim();
+                messagesEl.appendChild(li);
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            };
+
+            const setStatus = (text) => {
+                statusEl.textContent = text || '';
+            };
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const text = textarea.value.trim();
+                if (!text) {
+                    return;
+                }
+
+                addMessage('user', text);
+                history.push({ role: 'user', content: text });
+                textarea.value = '';
+                setStatus('AI가 응답을 생성하는 중입니다...');
+                submitButton.disabled = true;
+
+                try {
+                    const response = await fetch('/ai/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ message: text, history }),
+                    });
+
+                    const payload = await response.json();
+
+                    if (!response.ok || !payload.success) {
+                        throw new Error(payload.error || '알 수 없는 오류가 발생했습니다.');
+                    }
+
+                    const assistantMessage = payload.message;
+                    addMessage('assistant', assistantMessage.content);
+                    history.push(assistantMessage);
+                    setStatus('');
+                } catch (error) {
+                    console.error(error);
+                    setStatus(error.message || '오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+                    addMessage('assistant', '⚠️ 오류: ' + (error.message || '응답 생성에 실패했습니다.'));
+                } finally {
+                    submitButton.disabled = false;
+                    textarea.focus();
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
