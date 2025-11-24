@@ -9,3 +9,13 @@ CREATE TABLE users (
 	startTime INT,
 	endTime INT
 );
+
+CREATE TABLE ai_usage (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id VARCHAR(32) NOT NULL,
+    prompt_tokens INT DEFAULT 0,
+    completion_tokens INT DEFAULT 0,
+    total_tokens INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
