@@ -2,6 +2,7 @@ const express = require('express');
 
 const checkTime = require('../../middlewares/checkTime.middleware');
 const { requestChatCompletion } = require('../../services/ai/chat.service');
+const { logUsage } = require('../../services/ai/usage.service');
 
 const router = express.Router();
 
@@ -46,11 +47,16 @@ router.post('/chat', checkTime, async (req, res) => {
             content: message.trim(),
         });
 
-        const assistantMessage = await requestChatCompletion(messages);
+        const { message: assistantMessage, usage } = await requestChatCompletion(messages);
+
+        if (req.user?.id && usage) {
+            await logUsage(req.user.id, usage);
+        }
 
         return res.json({
             success: true,
             message: assistantMessage,
+            usage,
         });
     } catch (error) {
         console.error(error);
