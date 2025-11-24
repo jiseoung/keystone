@@ -67,6 +67,7 @@ h1 {
     gap: 16px;
     flex-wrap: wrap;
     align-items: center;
+    margin-top: 20px;
 }
 
 .btn {
