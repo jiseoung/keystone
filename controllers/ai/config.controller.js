@@ -26,9 +26,10 @@ router.post('/config', async (req, res) => {
     const startTime = Number.parseInt(req.body.startTime, 10);
     const endTime = Number.parseInt(req.body.endTime, 10);
 
-    const isValidHour = (value) => Number.isInteger(value) && value >= 0 && value <= 24;
+    const isValidStart = Number.isInteger(startTime) && startTime >= 0 && startTime <= 23;
+    const isValidEnd = Number.isInteger(endTime) && endTime > 0 && endTime <= 24;
 
-    if (!isValidHour(startTime) || !isValidHour(endTime) || startTime > endTime) {
+    if (!isValidStart || !isValidEnd || startTime >= endTime) {
         return res
             .status(400)
             .send("<script>alert('잘못된 시간 설정입니다.');location.href='/ai/config'</script>");
@@ -39,7 +40,7 @@ router.post('/config', async (req, res) => {
     if (result?.success) {
         return res
             .status(200)
-            .send("<script>alert('사용 시간 설정 완료');location.href='/ai/chat'</script>");
+            .send("<script>alert('사용 시간 설정 완료');location.href='/ai/config'</script>");
     }
 
     return res
