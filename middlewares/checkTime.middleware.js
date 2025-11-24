@@ -5,50 +5,53 @@ const checkTime = async (req, res, next) => {
         const userId = req.user?.id;
 
         if (!userId) {
-            return res.redirect('/');
+            return res
+                .status(401)
+                .send("<script>alert('로그인이 필요합니다.');location.href='/'</script>");
         }
 
         const useTime = await getUseTime(userId);
 
         if (!useTime || useTime.startTime === null || useTime.endTime === null) {
-            return next();
+            return res
+                .status(302)
+                .send("<script>alert('AI 사용 시간을 먼저 설정하세요.');location.href='/ai/config'</script>");
         }
 
         const start = Number(useTime.startTime);
         const end = Number(useTime.endTime);
 
-        if (
+        const invalidRange =
             Number.isNaN(start) ||
             Number.isNaN(end) ||
             start < 0 ||
-            end < 0 ||
-            start > 24 ||
-            end > 24
-        ) {
+            start > 23 ||
+            end <= 0 ||
+            end > 24 ||
+            start >= end;
+
+        if (invalidRange) {
             console.warn(`Invalid AI use-time config for ${userId}:`, useTime);
-            return res.redirect('/');
+            return res
+                .status(302)
+                .send("<script>alert('AI 사용 시간 설정이 잘못되었습니다.');location.href='/ai/config'</script>");
         }
 
         const currentHour = new Date().getHours();
-        let isAllowed = false;
-
-        if (start === end) {
-            isAllowed = currentHour === start;
-        } else if (start < end) {
-            isAllowed = currentHour >= start && currentHour < end;
-        } else {
-            // 방어적 코드: start > end인 config가 저장되었을 경우 하루를 넘기는 구간으로 간주
-            isAllowed = currentHour >= start || currentHour < end;
-        }
+        const isAllowed = currentHour >= start && currentHour < end;
 
         if (!isAllowed) {
-            return res.redirect('/');
+            return res
+                .status(302)
+                .send("<script>alert('지정된 사용 시간이 아닙니다.');location.href='/'</script>");
         }
 
         return next();
     } catch (error) {
         console.error('checkTime middleware error:', error);
-        return res.redirect('/');
+        return res
+            .status(302)
+            .send("<script>alert('시간 확인 중 오류가 발생했습니다.');location.href='/'</script>");
     }
 };
 
