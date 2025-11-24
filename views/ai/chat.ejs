@@ -6,8 +6,16 @@
     <link rel="stylesheet" href="/ai/chat.css">
 </head>
 <body>
+    <nav class="chat-nav">
+        <div class="chat-actions">
+            <a href="/ai/config" class="action-link">사용 시간 설정</a>
+            <form method="POST" action="/auth/logout" class="logout-form">
+                <button type="submit" class="action-link ghost">로그아웃</button>
+            </form>
+        </div>
+    </nav>
     <section class="chat-container">
-        <header><%= title %></header>
+        <header class="chat-header"><span class="chat-title"><%= title %></span></header>
         <ul id="messages"></ul>
         <form id="chat-form">
             <textarea id="message-input" placeholder="AI에게 질문을 입력하세요." required></textarea>
