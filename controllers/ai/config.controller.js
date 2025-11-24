@@ -1,6 +1,7 @@
 const express = require('express');
 
 const { setUseTime, getUseTime } = require('../../services/ai/config.service');
+const { getUsageSummary } = require('../../services/ai/usage.service');
 
 const router = express.Router();
 
@@ -8,10 +9,23 @@ router.get('/config', async (req, res) => {
     try {
         const userId = req.user?.id;
         const currentConfig = userId ? await getUseTime(userId) : null;
+        const usageSummary = userId ? await getUsageSummary(userId) : null;
+        const tokenLimit = Number.parseInt(process.env.AI_TOKEN_LIMIT || '', 10);
+
+        let usagePercentage = null;
+        if (usageSummary && Number.isFinite(usageSummary.totalTokens) && tokenLimit > 0) {
+            usagePercentage = Math.min(
+                100,
+                Number(((usageSummary.totalTokens / tokenLimit) * 100).toFixed(1)),
+            );
+        }
 
         res.render('ai/config', {
             title: 'AI 사용 시간 설정',
             config: currentConfig,
+            usageSummary,
+            tokenLimit: Number.isFinite(tokenLimit) && tokenLimit > 0 ? tokenLimit : null,
+            usagePercentage,
         });
     } catch (error) {
         console.error(error);
